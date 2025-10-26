@@ -1,0 +1,6 @@
+exports/
+.env
+prisma/
+src/
+.package.json
+
