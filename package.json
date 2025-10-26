@@ -1,0 +1,25 @@
+{
+  "name": "crm-dashboard-starter",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "postinstall": "prisma generate",
+    "dev": "node src/index.js",
+    "start": "node src/index.js",
+    "migrate": "prisma migrate dev --name init",
+    "seed": "node prisma/seed.js",
+    "export:csv": "node src/jobs/exportCsv.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "@prisma/client": "^5.17.0",
+    "node-cron": "^3.0.3",
+    "morgan": "^1.10.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "prisma": "^5.17.0",
+    "nodemon": "^3.1.0"
+  }
+}
