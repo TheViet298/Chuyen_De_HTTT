@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  OVERDUE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum AuthorType {
+  CUSTOMER
+  AGENT
+}
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  phone     String?
+  tickets   Ticket[]
+  createdAt DateTime @default(now())
+}
+
+model Agent {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  tickets   Ticket[]
+  createdAt DateTime @default(now())
+}
+
+model Ticket {
+  id               Int           @id @default(autoincrement())
+  title            String
+  description     String
+  status           TicketStatus  @default(OPEN)
+  priority         Priority      @default(MEDIUM)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  dueAt            DateTime?
+  closedAt         DateTime?
+  firstResponseAt  DateTime?
+  slaMinutes       Int           @default(1440) // 24h default
+
+  customer   Customer @relation(fields: [customerId], references: [id])
+  customerId Int
+
+  agent      Agent?   @relation(fields: [agentId], references: [id])
+  agentId    Int?
+
+  comments   Comment[]
+
+  @@index([status])
+  @@index([agentId])
+  @@index([createdAt])
+  @@index([dueAt])
+}
+
+model Comment {
+  id         Int        @id @default(autoincrement())
+  content    String
+  createdAt  DateTime   @default(now())
+  authorType AuthorType
+  ticket     Ticket     @relation(fields: [ticketId], references: [id])
+  ticketId   Int
+  // If authorType == AGENT, optionally link the agent record
+  agent      Agent?     @relation(fields: [agentId], references: [id])
+  agentId    Int?
+}
