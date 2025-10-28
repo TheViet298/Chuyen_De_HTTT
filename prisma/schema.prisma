@@ -7,26 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum TicketStatus {
-  OPEN
-  IN_PROGRESS
-  RESOLVED
-  CLOSED
-  OVERDUE
-}
-
-enum Priority {
-  LOW
-  MEDIUM
-  HIGH
-  URGENT
-}
-
-enum AuthorType {
-  CUSTOMER
-  AGENT
-}
-
 model Customer {
   id        Int      @id @default(autoincrement())
   name      String
@@ -37,33 +17,37 @@ model Customer {
 }
 
 model Agent {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
-  email     String   @unique
+  email     String    @unique
   tickets   Ticket[]
-  createdAt DateTime @default(now())
+  comments  Comment[] // đối ứng với Comment.agent
+  createdAt DateTime  @default(now())
 }
 
 model Ticket {
-  id               Int           @id @default(autoincrement())
-  title            String
-  description     String
-  status           TicketStatus  @default(OPEN)
-  priority         Priority      @default(MEDIUM)
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  dueAt            DateTime?
-  closedAt         DateTime?
-  firstResponseAt  DateTime?
-  slaMinutes       Int           @default(1440) // 24h default
+  id          Int    @id @default(autoincrement())
+  title       String
+  description String
+
+  // thay enum -> String
+  status   String @default("OPEN") // OPEN | IN_PROGRESS | RESOLVED | CLOSED | OVERDUE
+  priority String @default("MEDIUM") // LOW | MEDIUM | HIGH | URGENT
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  dueAt           DateTime?
+  closedAt        DateTime?
+  firstResponseAt DateTime?
+  slaMinutes      Int       @default(1440)
 
   customer   Customer @relation(fields: [customerId], references: [id])
   customerId Int
 
-  agent      Agent?   @relation(fields: [agentId], references: [id])
-  agentId    Int?
+  agent   Agent? @relation(fields: [agentId], references: [id])
+  agentId Int?
 
-  comments   Comment[]
+  comments Comment[]
 
   @@index([status])
   @@index([agentId])
@@ -72,13 +56,16 @@ model Ticket {
 }
 
 model Comment {
-  id         Int        @id @default(autoincrement())
-  content    String
-  createdAt  DateTime   @default(now())
-  authorType AuthorType
-  ticket     Ticket     @relation(fields: [ticketId], references: [id])
-  ticketId   Int
-  // If authorType == AGENT, optionally link the agent record
-  agent      Agent?     @relation(fields: [agentId], references: [id])
-  agentId    Int?
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+
+  // thay enum -> String
+  authorType String // CUSTOMER | AGENT
+
+  ticket   Ticket @relation(fields: [ticketId], references: [id])
+  ticketId Int
+
+  agent   Agent? @relation(fields: [agentId], references: [id])
+  agentId Int?
 }
