@@ -5,6 +5,7 @@ const cors = require('cors')
 const cron = require('node-cron')
 const path = require('path')
 const fs = require('fs')
+const serveIndex = require('serve-index');
 
 const tickets = require('./routes/tickets')
 const kpi = require('./routes/kpi')
@@ -23,6 +24,8 @@ app.use('/kpi', kpi)
 const exportDir = process.env.EXPORT_DIR || './exports'
 if (!fs.existsSync(exportDir)) fs.mkdirSync(exportDir, { recursive: true })
 app.use('/exports', express.static(path.resolve(exportDir)))
+app.use('/exports', express.static(path.resolve(exportDir)));
+app.use('/exports', serveIndex(path.resolve(exportDir), { icons: true }));
 
 // Cron: SLA overdue checker every 5 minutes
 const cronExpr = process.env.EXPORT_CRON || '*/5 * * * *'
